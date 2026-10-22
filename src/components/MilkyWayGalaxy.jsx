@@ -1297,7 +1297,11 @@ export default function MilkyWayGalaxy({
     const onEarthPointerMove = (e) => {
       if (currentSolarZoom < 0.90 || currentSolarZoom > 1.85) return;
       if (!isDraggingEarth) {
-        if (e.clientX > window.innerWidth * 0.35) {
+        const isMobileScreen = window.innerWidth < 768;
+        const isEarthArea = isMobileScreen
+          ? (e.clientY < window.innerHeight * 0.48)
+          : (e.clientX > window.innerWidth * 0.35);
+        if (isEarthArea) {
           renderer.domElement.style.cursor = 'grab';
         } else {
           renderer.domElement.style.cursor = 'default';

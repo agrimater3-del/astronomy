@@ -475,6 +475,7 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
           LEFT SIDE: 3D PPCRC BUILDING DIGITAL TWIN (INTERACTIVE 360°)
           ------------------------------------------------------------- */}
       <div
+        className="ppcrc-building-container"
         style={{
           position: 'relative',
           width: '54vw',
@@ -497,6 +498,7 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
         {/* 3D Interaction Badge & Return to Orbit Button */}
         <button
           type="button"
+          className="ppcrc-orbit-return-btn"
           onClick={onScrollUp}
           style={{
             position: 'absolute',
@@ -792,6 +794,7 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
 
       {/* Scroll Prompt Pill to explore Astronomy Club sections */}
       <div
+        className="ppcrc-scroll-prompt-btn"
         onClick={() => {
           if (stageContainerRef.current) {
             stageContainerRef.current.scrollTo({ top: window.innerHeight, behavior: 'smooth' });

@@ -137,6 +137,17 @@ export default function App() {
         return;
       }
 
+      // On mobile portrait in Earth inspection range (0.90 to 1.85), upper screen half is reserved for 3D Earth rotation
+      if (
+        window.innerWidth < 768 &&
+        isTiltedRef.current &&
+        solarZoomRef.current >= 0.90 &&
+        solarZoomRef.current <= 1.85 &&
+        e.touches[0].clientY < window.innerHeight * 0.48
+      ) {
+        return;
+      }
+
       if (!isTiltedRef.current) {
         if (deltaY > 20) {
           setIsTilted(true);

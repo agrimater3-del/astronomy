@@ -92,6 +92,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
             ========================================================= */}
         <section style={{ marginBottom: '60px' }}>
           <div
+            className="astroclub-ground-banner"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -142,7 +143,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
             </div>
 
             {/* Hardware / Facility Tags */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div className="astroclub-banner-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               <div
                 style={{
                   padding: '8px 14px',
@@ -205,6 +206,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
           </div>
 
           <div
+            className="astroclub-events-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -283,6 +285,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
 
           {/* 3 Astrophotography Cards */}
           <div
+            className="astroclub-gallery-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -334,6 +337,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
 
           {/* Leadership Team Cards: Ketan (Lead) & Bhakti (Co-Lead) */}
           <div
+            className="astroclub-leadership-box"
             style={{
               borderRadius: '20px',
               padding: '24px 32px',
@@ -391,6 +395,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
             BOTTOM NAVIGATION & RETURN TO ORBIT + DEVELOPER CREDITS
             ========================================================= */}
         <footer
+          className="astroclub-footer"
           style={{
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             paddingTop: '24px',
@@ -448,6 +453,7 @@ export default function AstroClubSections({ onReturnToOrbit }) {
 
           {/* Official Engineering & Developer Attribution */}
           <div
+            className="astroclub-dev-attribution"
             style={{
               padding: '14px 20px',
               borderRadius: '12px',

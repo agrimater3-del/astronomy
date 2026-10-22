@@ -3512,3 +3512,419 @@ html, body {
   }
 }
 
+/* ==========================================================================
+   MOBILE & TABLET VIEWPORT RESPONSIVE SYSTEM (ZERO DESKTOP IMPACT)
+   All rules strictly scoped to max-width: 900px, 768px, and 480px.
+   Desktop layout (> 900px) remains 100% unaltered, pristine, and pixel-perfect.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  /* 1. PPCRC Stage Viewport: Converts horizontal split into responsive vertical stack */
+  .ppcrc-stage-viewport {
+    flex-direction: column !important;
+    min-height: auto !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 60px !important;
+    padding-bottom: 30px !important;
+  }
+
+  .ppcrc-building-container {
+    width: 100vw !important;
+    height: 44vh !important;
+    min-height: 290px !important;
+    max-height: 380px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ppcrc-info-card {
+    width: calc(100vw - 28px) !important;
+    max-width: 560px !important;
+    margin: 10px auto 30px auto !important;
+    padding: 20px 20px !important;
+  }
+
+  .ppcrc-orbit-return-btn {
+    bottom: 14px !important;
+    left: 16px !important;
+  }
+
+  .ppcrc-scroll-prompt-btn {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 14px auto !important;
+    width: fit-content !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 2. Top Club Header Mobile Optimizations */
+  .club-navigation-header {
+    height: 60px !important;
+    padding: 0 16px !important;
+  }
+
+  .header-brand-container {
+    gap: 10px !important;
+  }
+
+  .header-logo-badge {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .header-club-title {
+    font-size: 13px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .header-club-subtitle {
+    font-size: 8px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .header-actions-right {
+    gap: 8px !important;
+  }
+
+  .header-cta-btn {
+    padding: 6px 12px !important;
+    font-size: 10.5px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .header-mobile-toggle {
+    display: flex !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 7px !important;
+    border-radius: 7px !important;
+  }
+
+  .header-mobile-drawer {
+    top: 60px !important;
+    padding: 20px 24px !important;
+  }
+
+  /* 3. Celestial Welcome Animation Mobile Choreography */
+  .celestial-welcome-hero {
+    width: 96vw !important;
+  }
+
+  .metallic-welcome-header {
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .metallic-welcome-text {
+    font-size: 11px !important;
+    letter-spacing: 0.22em !important;
+  }
+
+  .celestial-title-row {
+    --slot-size: clamp(48px, 14vw, 62px) !important;
+    --slot-gap: 4px !important;
+  }
+
+  .stone-crack-word {
+    font-size: clamp(17px, 5.0vw, 25px) !important;
+    letter-spacing: 0.02em !important;
+    -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .stone-space {
+    width: 5px !important;
+  }
+
+  .celestial-footer-subtitle {
+    font-size: 8.5px !important;
+    letter-spacing: 0.1em !important;
+    gap: 6px !important;
+    margin-top: 14px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 0 10px !important;
+  }
+
+  /* Mobile-tuned wing slide animations */
+  .title-wing-left.behind-galaxy {
+    transform: translateX(65px) !important;
+  }
+
+  .title-wing-right.behind-galaxy {
+    transform: translateX(-65px) !important;
+  }
+
+  .title-wing-left.sliding-out {
+    animation: slideOutLeftWingMobile 1.25s cubic-bezier(0.18, 0.89, 0.32, 1.25) forwards !important;
+  }
+
+  .title-wing-right.sliding-out {
+    animation: slideOutRightWingMobile 1.25s cubic-bezier(0.18, 0.89, 0.32, 1.25) forwards !important;
+  }
+
+  .title-wing-left.reversing {
+    animation: reverseLeftWingMobile 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  }
+
+  .title-wing-right.reversing {
+    animation: reverseRightWingMobile 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  }
+
+  /* 4. Stage 4 & 5: Cosmos & Milky Way Stage (Docked at Bottom on Mobile) */
+  .cosmos-hero-stage {
+    top: auto !important;
+    bottom: 20px !important;
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+    width: calc(100vw - 24px) !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
+    padding: 16px 16px 18px 16px !important;
+    border-radius: 18px !important;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.95), 0 0 24px rgba(241, 213, 165, 0.08) !important;
+  }
+
+  .cosmos-hero-stage.pos-left,
+  .cosmos-hero-stage.pos-right {
+    left: 12px !important;
+  }
+
+  .cosmos-bounce-letter {
+    font-size: clamp(34px, 9.5vw, 48px) !important;
+  }
+
+  .cosmos-main-heading {
+    margin: 0 0 8px 0 !important;
+    gap: 3px !important;
+  }
+
+  .cosmos-subheading-eyebrow {
+    font-size: 13px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .cosmos-subheading-tagline {
+    font-size: 10.5px !important;
+    letter-spacing: 0.08em !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  .cosmos-description-text {
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+  }
+
+  .milkyway-bounce-letter {
+    font-size: clamp(24px, 6.8vw, 34px) !important;
+  }
+
+  .milkyway-main-heading {
+    margin: 0 0 8px 0 !important;
+  }
+
+  .milkyway-subheading {
+    font-size: 12px !important;
+    margin: 0 0 8px 0 !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .milkyway-p {
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 6px !important;
+  }
+
+  .milkyway-stats-list {
+    margin-top: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .milkyway-stat-item {
+    font-size: 10px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  .stat-highlight {
+    font-size: 10px !important;
+  }
+
+  /* 5. Stage 6: Earth Hero Stage (Docked at Bottom on Mobile) */
+  .earth-hero-stage {
+    top: auto !important;
+    bottom: 20px !important;
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+    width: calc(100vw - 24px) !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
+    padding: 14px 14px 16px 14px !important;
+    border-radius: 18px !important;
+    gap: 8px !important;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.95), 0 0 24px rgba(56, 189, 248, 0.12) !important;
+  }
+
+  .earth-hero-stage.earth-stage-active {
+    transform: none !important;
+  }
+
+  .earth-bounce-letter {
+    font-size: clamp(28px, 8vw, 38px) !important;
+  }
+
+  /* 6. Planet Corner Showcase (Native Mobile Bottom Sheet) */
+  .planet-corner-showcase {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-height: 76vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    animation: showcaseSlideUpMobile 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  .showcase-viewport-box {
+    height: 130px !important;
+  }
+
+  .showcase-content-area {
+    padding: 10px 14px 28px !important;
+  }
+
+  /* 7. Astro Club Sections Mobile Refinements */
+  .astroclub-hub-container {
+    padding: 30px 14px 50px !important;
+  }
+
+  .astroclub-ground-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    padding: 18px 16px !important;
+  }
+
+  .astroclub-banner-tags {
+    width: 100% !important;
+  }
+
+  .astroclub-events-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .astroclub-gallery-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .astroclub-leadership-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 18px !important;
+    padding: 18px 16px !important;
+  }
+
+  .astroclub-footer {
+    padding-top: 18px !important;
+  }
+
+  .astroclub-dev-attribution {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 12px 16px !important;
+  }
+}
+
+/* Keyframes for Mobile-Specific Smooth Animations */
+@keyframes slideOutLeftWingMobile {
+  0% {
+    transform: translateX(65px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  72% {
+    transform: translateX(-8px);
+  }
+  86% {
+    transform: translateX(3px);
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRightWingMobile {
+  0% {
+    transform: translateX(-65px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  72% {
+    transform: translateX(8px);
+  }
+  86% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes reverseLeftWingMobile {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(65px);
+    opacity: 0;
+  }
+}
+
+@keyframes reverseRightWingMobile {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-65px);
+    opacity: 0;
+  }
+}
+
+@keyframes showcaseSlideUpMobile {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
