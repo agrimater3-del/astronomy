@@ -823,15 +823,16 @@ export default function MilkyWayGalaxy({
     // ------------------------------------------------------------
     const clock = new THREE.Clock();
     const animStartTime = performance.now();
-    const shrinkStart = 3.0;
-    const shrinkDuration = 2.0;
+    const shrinkStart = 2.0; // Reduced from 3.0s to 2.0s as requested
+    const shrinkDuration = 1.8;
     const startScale = 1.0;
     const targetScale = 0.20;
 
-    const zoomStart = 8.3;
-    const zoomDuration = 2.2;
+    const zoomStart = 7.0; // Adjusted for snappy, cinematic transition
+    const zoomDuration = 2.0;
     const startCamR = cameraR; // 30000
     const targetCamR = 360; // deep inside brightest core
+    const galaxySpinSpeed = 0.062; // Enhanced dynamic rotation speed
 
     // Stage 5 parameters: 90° tilt & zoom-out (positioned to the LEFT)
     const targetTiltedPhi = 7.0 * DEG;
@@ -853,25 +854,25 @@ export default function MilkyWayGalaxy({
       let pP = 0;
 
       if (elapsed < shrinkStart) {
-        // Phase 1: 0s-3s
-        galaxy.rotation.y += dt * 0.024;
+        // Phase 1: 0s-2s: full screen dynamic rotation
+        galaxy.rotation.y += dt * galaxySpinSpeed;
         galaxy.scale.setScalar(startScale);
         galaxy.position.set(0, 0, 0);
       } else if (elapsed >= shrinkStart && elapsed < shrinkStart + shrinkDuration) {
-        // Phase 2: 3s-5s
-        galaxy.rotation.y += dt * 0.024;
+        // Phase 2: 2s-3.8s: smooth shrink down
+        galaxy.rotation.y += dt * galaxySpinSpeed;
         const p = easeInOutCubic((elapsed - shrinkStart) / shrinkDuration);
         const currentScale = startScale + (targetScale - startScale) * p;
         galaxy.scale.setScalar(currentScale);
         galaxy.position.set(0, 0, 0);
       } else if (elapsed < zoomStart) {
-        // Phase 3 & 4: 5s-8.3s
-        galaxy.rotation.y += dt * 0.024;
+        // Phase 3 & 4: 3.8s-7s: welcome text and title
+        galaxy.rotation.y += dt * galaxySpinSpeed;
         galaxy.scale.setScalar(targetScale);
         galaxy.position.set(0, 0, 0);
       } else if (elapsed >= zoomStart && elapsed < zoomStart + zoomDuration) {
-        // Phase 5: 8.3s+: ZOOM INTO BRIGHTEST CORE
-        galaxy.rotation.y += dt * 0.024;
+        // Phase 5: 7s-9s: ZOOM INTO BRIGHTEST CORE
+        galaxy.rotation.y += dt * galaxySpinSpeed;
         const p = easeInOutCubic((elapsed - zoomStart) / zoomDuration);
         const currentScale = targetScale + (1.25 - targetScale) * p;
         galaxy.scale.setScalar(currentScale);
@@ -921,7 +922,7 @@ export default function MilkyWayGalaxy({
 
         // Bulk galaxy rotation eases gently to 0 as we enter the Solar System
         const spinFactor = Math.max(0, 1.0 - sP * 1.0);
-        galaxy.rotation.y += dt * 0.024 * spinFactor;
+        galaxy.rotation.y += dt * galaxySpinSpeed * spinFactor;
 
         // Base galactic camera coordinates (edge-on view shifted to left)
         const currentPhi = topDownPhi + (targetTiltedPhi - topDownPhi) * pTilt;

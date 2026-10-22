@@ -449,55 +449,106 @@ export default function AstroClubSections({ onReturnToOrbit }) {
         </section>
 
         {/* =========================================================
-            BOTTOM NAVIGATION & RETURN TO ORBIT
+            BOTTOM NAVIGATION & RETURN TO ORBIT + DEVELOPER CREDITS
             ========================================================= */}
         <footer
           style={{
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            paddingTop: '24px',
+            paddingTop: '28px',
             display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '16px',
-            fontSize: '13px',
-            color: '#64748b'
+            flexDirection: 'column',
+            gap: '20px'
           }}
         >
-          <div>
-            © {new Date().getFullYear()} I²IT Astronomy Club • Hope Foundation • PPCRC Complex Hinjawadi
-          </div>
-
-          <button
-            type="button"
-            onClick={onReturnToOrbit}
+          <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              gap: '8px',
-              padding: '8px 18px',
-              borderRadius: '9999px',
-              background: 'rgba(56, 189, 248, 0.12)',
-              border: '1px solid rgba(56, 189, 248, 0.35)',
-              color: '#38bdf8',
-              fontFamily: "'Space Grotesk', monospace",
-              fontSize: '11px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(56, 189, 248, 0.25)';
-              e.currentTarget.style.borderColor = '#38bdf8';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(56, 189, 248, 0.12)';
-              e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.35)';
+              gap: '16px',
+              fontSize: '13px',
+              color: '#64748b'
             }}
           >
-            <span>↑</span>
-            <span>RETURN TO COSMIC ORBIT</span>
-          </button>
+            <div>
+              © {new Date().getFullYear()} I²IT Astronomy Club • Hope Foundation • PPCRC Complex Hinjawadi
+            </div>
+
+            <button
+              type="button"
+              onClick={onReturnToOrbit}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 18px',
+                borderRadius: '9999px',
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                color: '#38bdf8',
+                fontFamily: "'Space Grotesk', monospace",
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(56, 189, 248, 0.25)';
+                e.currentTarget.style.borderColor = '#38bdf8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(56, 189, 248, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.35)';
+              }}
+            >
+              <span>↑</span>
+              <span>RETURN TO COSMIC ORBIT</span>
+            </button>
+          </div>
+
+          {/* Official Engineering & Developer Attribution */}
+          <div
+            style={{
+              padding: '16px 22px',
+              borderRadius: '14px',
+              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.22)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px' }}>⚡</span>
+              <span
+                style={{
+                  fontFamily: "'Space Grotesk', monospace",
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  color: '#38bdf8'
+                }}
+              >
+                DEVELOPED BY JARVIS ASTRA V2.0
+              </span>
+            </div>
+
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', monospace",
+                fontSize: '12px',
+                color: '#94a3b8'
+              }}
+            >
+              Developers:&nbsp;
+              <span style={{ color: '#ffffff', fontWeight: 600 }}>Dhairyashil Shinde</span>,&nbsp;
+              <span style={{ color: '#ffffff', fontWeight: 600 }}>Prathamesh Raut</span>,&nbsp;
+              <span style={{ color: '#ffffff', fontWeight: 600 }}>Ganesh</span>
+            </div>
+          </div>
         </footer>
 
       </div>

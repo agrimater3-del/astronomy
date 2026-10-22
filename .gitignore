@@ -28,6 +28,8 @@ test_*.png
 astronomy_*.png
 scratch_*.png
 hershey_*.png
-astroclub/
+/astroclub/
+!public/astroclub/
+!public/astroclub/**
 __pycache__/
 *.pyc

@@ -15,30 +15,30 @@ export default function CelestialWelcome({ isTilted = false }) {
   const [fullyCompleted, setFullyCompleted] = useState(false);
 
   useEffect(() => {
-    // 1. At 5.0 seconds: "WELCOME TO" appears
+    // 1. At 3.8 seconds: "WELCOME TO" appears as galaxy shrinks
     const tWelcome = setTimeout(() => {
       setWelcomeVisible(true);
-    }, 5000);
+    }, 3800);
 
-    // 2. At 5.0 seconds: Words emerge from behind the galaxy
+    // 2. At 3.8 seconds: Words emerge from behind the galaxy
     const tWords = setTimeout(() => {
       setWordsSlideOut(true);
-    }, 5000);
+    }, 3800);
 
-    // 3. At 6.3 seconds: Institutional Subtitle reveals
+    // 3. At 4.9 seconds: Institutional Subtitle reveals
     const tSub = setTimeout(() => {
       setSubVisible(true);
-    }, 6300);
+    }, 4900);
 
-    // 4. At 8.3 seconds: All text reverses back into position it was born from
+    // 4. At 7.0 seconds: All text reverses back into position
     const tReverse = setTimeout(() => {
       setReversing(true);
-    }, 8300);
+    }, 7000);
 
-    // 5. At 9.2 seconds: Reverse animation complete -> remove from DOM completely!
+    // 5. At 7.9 seconds: Reverse animation complete -> remove from DOM
     const tDone = setTimeout(() => {
       setFullyCompleted(true);
-    }, 9200);
+    }, 7900);
 
     return () => {
       clearTimeout(tWelcome);

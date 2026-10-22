@@ -20,11 +20,11 @@ export default function App() {
   const [selectedPlanet, setSelectedPlanet] = useState(null); // Selected planet for 3D corner showcase
   const [blankPhase, setBlankPhase] = useState('idle'); // 'idle' | 'ready'
 
-  // Guarantee coreZoomComplete triggers around 10.4s even if WebGL is throttled
+  // Guarantee coreZoomComplete triggers around 9.1s even if WebGL is throttled
   useEffect(() => {
     const timer = setTimeout(() => {
       setCoreZoomComplete(true);
-    }, 10400);
+    }, 9100);
     return () => clearTimeout(timer);
   }, []);
 
