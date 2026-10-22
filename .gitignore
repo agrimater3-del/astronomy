@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary test outputs and local django archive
+test_*.png
+astronomy_*.png
+scratch_*.png
+hershey_*.png
+astroclub/
+__pycache__/
+*.pyc

@@ -85,12 +85,8 @@ export default function App() {
     };
 
     const handleWheel = (e) => {
-      // If inside PPCRC Operating Center: scrolling up returns smoothly to Pune / Earth view
+      // If inside PPCRC Operating Center: let component manage internal scroll and trigger onScrollUp at top
       if (blankPhaseRef.current === 'ready') {
-        if (e.deltaY < -15) {
-          setBlankPhase('idle');
-          setSolarZoom(2.15);
-        }
         return;
       }
 
@@ -129,10 +125,6 @@ export default function App() {
       touchStartY = e.touches[0].clientY;
 
       if (blankPhaseRef.current === 'ready') {
-        if (deltaY < -20) {
-          setBlankPhase('idle');
-          setSolarZoom(2.15);
-        }
         return;
       }
 

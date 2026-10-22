@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import AstroClubSections from './AstroClubSections';
 
 // Module-level persistent cache: 12MB model is loaded/parsed once and preserved forever
 let cachedBuildingScene = null;
@@ -30,6 +31,7 @@ export function preloadPpcrcBuilding() {
 
 export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
   const mountRef = useRef(null);
+  const stageContainerRef = useRef(null);
   const visibleRef = useRef(visible);
   const [lettersFinished, setLettersFinished] = useState(false);
   const titleLetters = ['P', 'P', 'R', 'C', ' ', 'B', 'U', 'I', 'L', 'D', 'I', 'N', 'G'];
@@ -37,6 +39,9 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
   useEffect(() => {
     visibleRef.current = visible;
     if (visible) {
+      if (stageContainerRef.current) {
+        stageContainerRef.current.scrollTop = 0;
+      }
       setLettersFinished(false);
       const timer = setTimeout(() => {
         setLettersFinished(true);
@@ -427,14 +432,21 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
 
   return (
     <div
+      ref={stageContainerRef}
       className="ppcrc-operating-stage"
+      onWheel={(e) => {
+        if (!stageContainerRef.current) return;
+        if (stageContainerRef.current.scrollTop <= 2 && e.deltaY < -20) {
+          if (onScrollUp) onScrollUp();
+        }
+      }}
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 45,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        scrollBehavior: 'smooth',
         pointerEvents: visible ? 'auto' : 'none',
         visibility: visible ? 'visible' : 'hidden',
         opacity: visible ? 1 : 0,
@@ -443,6 +455,17 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
         userSelect: visible ? 'auto' : 'none'
       }}
     >
+      <div
+        className="ppcrc-stage-viewport"
+        style={{
+          width: '100%',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative'
+        }}
+      >
       {/* -------------------------------------------------------------
           LEFT SIDE: 3D PPCRC BUILDING DIGITAL TWIN (INTERACTIVE 360°)
           ------------------------------------------------------------- */}
@@ -761,6 +784,54 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
           </div>
         </div>
       </div>
+
+      {/* Scroll Prompt Pill to explore Astronomy Club sections */}
+      <div
+        onClick={() => {
+          if (stageContainerRef.current) {
+            stageContainerRef.current.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+          }
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '22px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 20px',
+          borderRadius: '9999px',
+          background: 'rgba(2, 6, 18, 0.9)',
+          border: '1px solid rgba(77, 182, 177, 0.5)',
+          backdropFilter: 'blur(10px)',
+          color: '#4db6b1',
+          fontFamily: "'Space Grotesk', monospace",
+          fontSize: '11px',
+          letterSpacing: '0.08em',
+          cursor: 'pointer',
+          zIndex: 15,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(77, 182, 177, 0.2)';
+          e.currentTarget.style.borderColor = '#4db6b1';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(2, 6, 18, 0.9)';
+          e.currentTarget.style.borderColor = 'rgba(77, 182, 177, 0.5)';
+        }}
+      >
+        <span>SCROLL DOWN TO EXPLORE I²IT ASTRONOMY CLUB HQ</span>
+        <span style={{ fontSize: '13px' }}>↓</span>
+      </div>
     </div>
+
+    {/* -------------------------------------------------------------
+        I²IT ASTRONOMY CLUB SECTIONS (2-3 LIGHTWEIGHT SECTIONS)
+        ------------------------------------------------------------- */}
+    <AstroClubSections onReturnToOrbit={onScrollUp} />
+  </div>
   );
 }
