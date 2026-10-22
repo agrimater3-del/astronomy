@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Realistic Solar System .GLB Generator</title>
+    <style>
+        body {
+            margin: 0;
+            background: #030508;
+            color: #f0f4f8;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        #ui {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+            background: rgba(10, 14, 24, 0.88);
+            backdrop-filter: blur(8px);
+            padding: 18px 22px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            max-width: 340px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            font-size: 17px;
+            margin: 0 0 6px 0;
+            letter-spacing: 0.3px;
+        }
+
+        p {
+            font-size: 13px;
+            color: #a5b4fc;
+            margin: 0 0 14px 0;
+            line-height: 1.45;
+        }
+
+        button {
+            width: 100%;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.94;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .meta {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+
+<body>
+    <div id="ui">
+        <h1>Solar System .GLB Builder</h1>
+        <p>Procedural 1K equirectangular PBR maps, specular oceans, axial obliquity, Earth+Moon, and alpha-mapped Saturn
+            &amp; Uranus rings.</p>
+        <button id="exportBtn">Download Realistic .GLB</button>
+        <div class="meta" id="status">Drag to orbit • Scroll to zoom • Right-drag to pan</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+        // --- Deterministic Value Noise for Realistic Planetary Textures ---
+        function hash(x, y) {
+            let n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+            return n - Math.floor(n);
+        }
+        function smoothNoise(x, y) {
+            const ix = Math.floor(x), iy = Math.floor(y);
+            const fx = x - ix, fy = y - iy;
+            const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+            const a = hash(ix, iy), b = hash(ix + 1, iy);
+            const c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
+            return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+        }
+        function fbm(x, y, octaves = 5) {
+            let val = 0, amp = 0.5, freq = 1;
+            for (let i = 0; i < octaves; i++) {
+                val += amp * smoothNoise(x * freq, y * freq);
+                freq *= 2.03;
+                amp *= 0.5;
+            }
+            return val;
+        }
+
+        // --- Procedural 1024x512 Equirectangular Texture Generator ---
+        function createPlanetTextures(type) {
+            const w = 1024, h = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            const img = ctx.createImageData(w, h);
+            const data = img.data;
+
+            // Optional roughness canvas for Earth/Rocky bodies
+            const rCanvas = document.createElement('canvas');
+            rCanvas.width = w; rCanvas.height = h;
+            const rCtx = rCanvas.getContext('2d');
+            const rImg = rCtx.createImageData(w, h);
+            const rData = rImg.data;
+
+            for (let y = 0; y < h; y++) {
+                const v = y / h;
+                const lat = Math.abs(v - 0.5) * 2; // 0 at equator, 1 at poles
+                for (let x = 0; x < w; x++) {
+                    const u = x / w;
+                    const idx = (y * w + x) * 4;
+                    // Seamless horizontal wrapping via cylindrical coordinates
+                    const nx = Math.cos(u * Math.PI * 2) * 2.5 + 10;
+                    const ny = Math.sin(u * Math.PI * 2) * 2.5 + 10;
+                    const nz = v * 5;
+
+                    let r = 128, g = 128, b = 128, rough = 220;
+
+                    if (type === 'sun') {
+                        const n = fbm(nx * 3, nz * 3 + fbm(ny * 2, nz * 2, 3), 5);
+                        r = Math.min(255, 220 + n * 55);
+                        g = Math.min(255, 95 + Math.pow(n, 1.4) * 150);
+                        b = Math.min(255, 15 + Math.pow(n, 3.0) * 140);
+                    } else if (type === 'mercury' || type === 'moon') {
+                        const n = fbm(nx * 4, nz * 4, 6);
+                        const craters = Math.pow(fbm(nx * 10 + 5, nz * 10 + 5, 4), 2.5);
+                        const base = type === 'mercury' ? 115 : 135;
+                        const lum = Math.max(40, Math.min(220, base + (n - 0.5) * 90 - craters * 55));
+                        r = lum + (type === 'mercury' ? 6 : 0);
+                        g = lum;
+                        b = lum - (type === 'mercury' ? 6 : 0);
+                        rough = 235;
+                    } else if (type === 'venus') {
+                        const turb = fbm(nx * 1.5, nz * 2.5, 4);
+                        const bands = Math.sin((v * 14) + turb * 3.5) * 0.5 + 0.5;
+                        r = 215 + bands * 28;
+                        g = 170 + bands * 32;
+                        b = 105 + bands * 25;
+                        rough = 170;
+                    } else if (type === 'earth') {
+                        const elev = fbm(nx * 2.2, nz * 2.2 + ny * 0.8, 6);
+                        const clouds = Math.max(0, fbm(nx * 3.5 + 12, nz * 3.5 + 8, 5) - 0.52) * 2.1;
+                        if (lat > 0.84 - elev * 0.08) {
+                            // Polar ice caps
+                            r = 240; g = 246; b = 252; rough = 160;
+                        } else if (elev < 0.49) {
+                            // Deep & shallow ocean
+                            const depth = elev / 0.49;
+                            r = 12 + depth * 18;
+                            g = 45 + depth * 55;
+                            b = 115 + depth * 75;
+                            rough = 55; // Specular water
+                        } else {
+                            // Continents (forests, savannas, deserts, mountains)
+                            const humid = fbm(nx * 3 + 30, nz * 3, 4);
+                            if (humid > 0.53 && lat < 0.65) {
+                                r = 38 + (elev - 0.5) * 90;
+                                g = 88 + (elev - 0.5) * 70;
+                                b = 34;
+                            } else {
+                                r = 155 + (elev - 0.5) * 110;
+                                g = 132 + (elev - 0.5) * 85;
+                                b = 88;
+                            }
+                            rough = 225; // Matte landmass
+                        }
+                        // Blend atmospheric clouds
+                        if (clouds > 0.05) {
+                            const c = Math.min(1, clouds);
+                            r = r * (1 - c) + 250 * c;
+                            g = g * (1 - c) + 252 * c;
+                            b = b * (1 - c) + 255 * c;
+                        }
+                    } else if (type === 'mars') {
+                        const n = fbm(nx * 2.6, nz * 2.6 + ny * 0.6, 6);
+                        if (lat > 0.90 - n * 0.04) {
+                            r = 235; g = 230; b = 225; rough = 180;
+                        } else {
+                            r = 155 + (n - 0.45) * 130;
+                            g = 78 + (n - 0.45) * 75;
+                            b = 45 + (n - 0.45) * 45;
+                            rough = 230;
+                        }
+                    } else if (type === 'jupiter') {
+                        const turb = fbm(nx * 2.5, nz * 6, 5) * 0.08;
+                        const band = Math.sin((v + turb) * 38);
+                        const zone = Math.cos((v + turb * 0.6) * 19);
+                        r = 195 + band * 35 + zone * 18;
+                        g = 155 + band * 38 + zone * 22;
+                        b = 115 + band * 32 + zone * 20;
+                        // Great Red Spot at ~22 deg South (v ~ 0.62, u ~ 0.35)
+                        const dx = (u - 0.35) * 9.5, dy = (v - 0.62) * 19;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 1.0) {
+                            const blend = Math.pow(1 - dist, 1.5);
+                            r = r * (1 - blend) + 215 * blend;
+                            g = g * (1 - blend) + 82 * blend;
+                            b = b * (1 - blend) + 52 * blend;
+                        }
+                        rough = 140;
+                    } else if (type === 'saturn') {
+                        const turb = fbm(nx * 2, nz * 5, 4) * 0.04;
+                        const band = Math.sin((v + turb) * 32);
+                        r = 218 + band * 20 - lat * 25;
+                        g = 192 + band * 22 - lat * 25;
+                        b = 138 + band * 18 - lat * 15;
+                        rough = 145;
+                    } else if (type === 'uranus') {
+                        const band = Math.sin(v * 16) * 8;
+                        r = 145 + band;
+                        g = 215 + band;
+                        b = 228 + band;
+                        rough = 130;
+                    } else if (type === 'neptune') {
+                        const streak = fbm(nx * 4, nz * 12, 4);
+                        const band = Math.cos(v * 20) * 14;
+                        r = 42 + band + (streak > 0.68 ? 110 : 0);
+                        g = 92 + band + (streak > 0.68 ? 120 : 0);
+                        b = 198 + band + (streak > 0.68 ? 50 : 0);
+                        rough = 130;
+                    }
+
+                    data[idx] = Math.max(0, Math.min(255, r));
+                    data[idx + 1] = Math.max(0, Math.min(255, g));
+                    data[idx + 2] = Math.max(0, Math.min(255, b));
+                    data[idx + 3] = 255;
+
+                    rData[idx] = rData[idx + 1] = rData[idx + 2] = rough;
+                    rData[idx + 3] = 255;
+                }
+            }
+            ctx.putImageData(img, 0, 0);
+            rCtx.putImageData(rImg, 0, 0);
+
+            const colorMap = new THREE.CanvasTexture(canvas);
+            colorMap.colorSpace = THREE.SRGBColorSpace;
+            colorMap.wrapS = THREE.RepeatWrapping;
+            colorMap.wrapT = THREE.ClampToEdgeWrapping;
+
+            const roughMap = new THREE.CanvasTexture(rCanvas);
+            roughMap.wrapS = THREE.RepeatWrapping;
+            roughMap.wrapT = THREE.ClampToEdgeWrapping;
+
+            return { colorMap, roughMap };
+        }
+
+        // --- Radial Ring Texture & Custom UV-Mapped Ring Geometry ---
+        function createRingMesh(innerRadius, outerRadius, isUranus = false) {
+            const rw = 512, rh = 32;
+            const canvas = document.createElement('canvas');
+            canvas.width = rw; canvas.height = rh;
+            const ctx = canvas.getContext('2d');
+            const img = ctx.createImageData(rw, rh);
+            const data = img.data;
+
+            for (let x = 0; x < rw; x++) {
+                const t = x / rw; // 0 = inner edge, 1 = outer edge
+                let r = 212, g = 190, b = 152, alpha = 0;
+
+                if (isUranus) {
+                    r = 165; g = 210; b = 225;
+                    alpha = (t > 0.72 && t < 0.78) || (t > 0.88 && t < 0.94) ? 95 : 0;
+                } else {
+                    // Saturn C Ring (0.0 - 0.24), B Ring (0.24 - 0.64), Cassini Division (0.64 - 0.70), A Ring (0.70 - 0.98)
+                    const ripple = Math.sin(t * 240) * 0.15 + Math.cos(t * 95) * 0.15;
+                    if (t > 0.04 && t < 0.24) {
+                        alpha = (45 + ripple * 25);
+                        r = 175; g = 158; b = 132;
+                    } else if (t >= 0.24 && t < 0.64) {
+                        alpha = (215 + ripple * 40);
+                        r = 225; g = 204; b = 165;
+                    } else if (t >= 0.64 && t < 0.70) {
+                        alpha = 12; // Cassini Division gap
+                    } else if (t >= 0.70 && t < 0.98) {
+                        // Encke gap at ~0.91
+                        alpha = (t > 0.90 && t < 0.92) ? 18 : (165 + ripple * 35);
+                        r = 205; g = 188; b = 155;
+                    }
+                }
+                for (let y = 0; y < rh; y++) {
+                    const idx = (y * rw + x) * 4;
+                    data[idx] = r; data[idx + 1] = g; data[idx + 2] = b;
+                    data[idx + 3] = Math.max(0, Math.min(255, alpha));
+                }
+            }
+            ctx.putImageData(img, 0, 0);
+            const ringTex = new THREE.CanvasTexture(canvas);
+            ringTex.colorSpace = THREE.SRGBColorSpace;
+
+            const geom = new THREE.RingGeometry(innerRadius, outerRadius, 128, 1);
+            // Remap UVs radially so U=0 at innerRadius and U=1 at outerRadius
+            const pos = geom.attributes.position;
+            const uvs = geom.attributes.uv;
+            const v3 = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+                v3.fromBufferAttribute(pos, i);
+                const radius = v3.length();
+                const u = (radius - innerRadius) / (outerRadius - innerRadius);
+                uvs.setXY(i, u, 0.5);
+            }
+            geom.rotateX(Math.PI / 2);
+
+            const mat = new THREE.MeshStandardMaterial({
+                map: ringTex,
+                side: THREE.DoubleSide,
+                transparent: true,
+                roughness: 0.75,
+                metalness: 0.05,
+                depthWrite: false
+            });
+            return new THREE.Mesh(geom, mat);
+        }
+
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        const solarSystemRoot = new THREE.Group();
+        solarSystemRoot.name = 'SolarSystem_Root';
+        scene.add(solarSystemRoot);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 32, 68);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lighting (Exported in GLB + Ambient for visibility)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+        solarSystemRoot.add(ambientLight);
+        const sunLight = new THREE.PointLight(0xfff6e5, 3.2, 0, 0.0);
+        sunLight.name = 'Sun_PointLight';
+        solarSystemRoot.add(sunLight);
+
+        // --- Build Sun ---
+        const sunTex = createPlanetTextures('sun');
+        const sunMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(4.5, 64, 32),
+            new THREE.MeshStandardMaterial({
+                map: sunTex.colorMap,
+                emissiveMap: sunTex.colorMap,
+                emissive: new THREE.Color(0xffb74d),
+                emissiveIntensity: 1.4,
+                roughness: 1.0
+            })
+        );
+        sunMesh.name = 'Sun';
+        sunMesh.rotation.z = THREE.MathUtils.degToRad(7.25);
+        solarSystemRoot.add(sunMesh);
+
+        // --- Planet Specifications ---
+        const planetsSpec = [
+            { name: 'Mercury', type: 'mercury', radius: 0.32, dist: 8.0, tilt: 0.03, inc: 7.00, speed: 4.15, angle: 0.4 },
+            { name: 'Venus', type: 'venus', radius: 0.60, dist: 11.5, tilt: 177.36, inc: 3.39, speed: 1.62, angle: 1.9 },
+            { name: 'Earth', type: 'earth', radius: 0.65, dist: 15.5, tilt: 23.44, inc: 0.00, speed: 1.00, angle: 3.1, hasMoon: true },
+            { name: 'Mars', type: 'mars', radius: 0.45, dist: 20.0, tilt: 25.19, inc: 1.85, speed: 0.53, angle: 4.6 },
+            { name: 'Jupiter', type: 'jupiter', radius: 1.95, dist: 27.5, tilt: 3.13, inc: 1.31, speed: 0.28, angle: 0.9 },
+            { name: 'Saturn', type: 'saturn', radius: 1.60, dist: 36.5, tilt: 26.73, inc: 2.49, speed: 0.18, angle: 2.5, rings: [2.05, 3.85, false] },
+            { name: 'Uranus', type: 'uranus', radius: 1.05, dist: 45.5, tilt: 97.77, inc: 0.77, speed: 0.12, angle: 5.2, rings: [1.35, 1.75, true] },
+            { name: 'Neptune', type: 'neptune', radius: 1.02, dist: 53.5, tilt: 28.32, inc: 1.77, speed: 0.09, angle: 3.9 }
+        ];
+
+        const animatedNodes = [];
+
+        planetsSpec.forEach((p) => {
+            // Orbital Plane Group (inclination)
+            const orbitPlane = new THREE.Group();
+            orbitPlane.name = `${p.name}_OrbitPlane`;
+            orbitPlane.rotation.z = THREE.MathUtils.degToRad(p.inc);
+            solarSystemRoot.add(orbitPlane);
+
+            // Thin physical torus for orbit guide (exports cleanly to all GLB viewers)
+            const orbitRing = new THREE.Mesh(
+                new THREE.TorusGeometry(p.dist, 0.025, 8, 128),
+                new THREE.MeshBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.45 })
+            );
+            orbitRing.rotation.x = Math.PI / 2;
+            orbitRing.name = `${p.name}_OrbitPath`;
+            orbitPlane.add(orbitRing);
+
+            // Pivot for orbital revolution
+            const orbitPivot = new THREE.Group();
+            orbitPivot.name = `${p.name}_OrbitPivot`;
+            orbitPivot.rotation.y = p.angle;
+            orbitPlane.add(orbitPivot);
+
+            // Carrier at orbital distance with axial tilt (obliquity)
+            const tiltGroup = new THREE.Group();
+            tiltGroup.name = `${p.name}_AxialTilt`;
+            tiltGroup.position.set(p.dist, 0, 0);
+            tiltGroup.rotation.z = THREE.MathUtils.degToRad(p.tilt);
+            orbitPivot.add(tiltGroup);
+
+            const tex = createPlanetTextures(p.type);
+            const mesh = new THREE.Mesh(
+                new THREE.SphereGeometry(p.radius, 64, 32),
+                new THREE.MeshStandardMaterial({
+                    map: tex.colorMap,
+                    roughnessMap: tex.roughMap,
+                    roughness: 1.0,
+                    metalness: 0.02
+                })
+            );
+            mesh.name = p.name;
+            tiltGroup.add(mesh);
+
+            if (p.rings) {
+                const ringMesh = createRingMesh(p.rings[0], p.rings[1], p.rings[2]);
+                ringMesh.name = `${p.name}_Rings`;
+                tiltGroup.add(ringMesh);
+            }
+
+            if (p.hasMoon) {
+                const moonPivot = new THREE.Group();
+                moonPivot.name = 'Moon_OrbitPivot';
+                moonPivot.rotation.z = THREE.MathUtils.degToRad(5.14);
+                tiltGroup.add(moonPivot);
+
+                const moonTex = createPlanetTextures('moon');
+                const moonMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.18, 32, 16),
+                    new THREE.MeshStandardMaterial({
+                        map: moonTex.colorMap,
+                        roughnessMap: moonTex.roughMap,
+                        roughness: 1.0
+                    })
+                );
+                moonMesh.name = 'Moon';
+                moonMesh.position.set(1.45, 0, 0);
+                moonPivot.add(moonMesh);
+                animatedNodes.push({ pivot: moonPivot, mesh: moonMesh, speed: 8.0 });
+            }
+
+            animatedNodes.push({ pivot: orbitPivot, mesh: mesh, speed: p.speed });
+        });
+
+        // --- Export Binary .GLB Function ---
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const btn = document.getElementById('exportBtn');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            status.textContent = 'Packing textures and meshes into binary .GLB...';
+
+            const exporter = new GLTFExporter();
+            exporter.parse(
+                solarSystemRoot,
+                (glbBuffer) => {
+                    const blob = new Blob([glbBuffer], { type: 'model/gltf-binary' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'solar_system.glb';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    btn.disabled = false;
+                    status.textContent = 'Downloaded solar_system.glb successfully!';
+                },
+                (err) => {
+                    console.error(err);
+                    btn.disabled = false;
+                    status.textContent = 'Export error — check console.';
+                },
+                { binary: true }
+            );
+        });
+
+        // --- Viewport Animation Loop ---
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            sunMesh.rotation.y += dt * 0.08;
+            animatedNodes.forEach((item) => {
+                item.pivot.rotation.y += dt * 0.15 * item.speed;
+                item.mesh.rotation.y += dt * 0.6;
+            });
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
