@@ -52,12 +52,21 @@ export default function App() {
     }
   }, [isTilted, solarZoom, selectedPlanet]);
 
-  // Preload PPCRC digital twin building into memory as soon as user approaches Earth info stage
+  // Preload PPCRC digital twin building in background idle time so Earth flight never hitches
   useEffect(() => {
-    if (isTilted && solarZoom >= 1.0) {
-      preloadPpcrcBuilding();
-    }
-  }, [isTilted, solarZoom >= 1.0]);
+    if (!coreZoomComplete) return;
+    const idleId = typeof window !== 'undefined' && window.requestIdleCallback
+      ? window.requestIdleCallback(() => preloadPpcrcBuilding(), { timeout: 3500 })
+      : setTimeout(() => preloadPpcrcBuilding(), 2000);
+
+    return () => {
+      if (typeof window !== 'undefined' && window.cancelIdleCallback && typeof idleId === 'number') {
+        window.cancelIdleCallback(idleId);
+      } else {
+        clearTimeout(idleId);
+      }
+    };
+  }, [coreZoomComplete]);
 
   useEffect(() => {
     if (!coreZoomComplete) return;

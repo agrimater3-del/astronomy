@@ -771,6 +771,7 @@ export default function MilkyWayGalaxy({
         }
         root.rotation.set(0, 0, 0);
         earthSpinGroup.add(root);
+        renderer.compile(scene, camera);
       },
       undefined,
       () => {
@@ -1085,25 +1086,27 @@ export default function MilkyWayGalaxy({
       // ------------------------------------------------------------
       // 6. REAL-TIME PLANETARY ORBITAL MOTION & AXIAL ROTATION
       // ------------------------------------------------------------
-      animatedPlanets.forEach((p) => {
-        // Orbit around Sun (Keplerian relative speeds)
-        p.angle += dt * p.speed * 0.45;
-        p.mesh.position.x = p.r * Math.cos(p.angle);
-        p.mesh.position.z = p.r * Math.sin(p.angle);
+      if (solarSystemGroup.visible) {
+        animatedPlanets.forEach((p) => {
+          // Orbit around Sun (Keplerian relative speeds)
+          p.angle += dt * p.speed * 0.45;
+          p.mesh.position.x = p.r * Math.cos(p.angle);
+          p.mesh.position.z = p.r * Math.sin(p.angle);
 
-        // Axial spin on planet's own axis
-        p.mesh.rotation.y += dt * p.rotSpeed * 0.8;
+          // Axial spin on planet's own axis
+          p.mesh.rotation.y += dt * p.rotSpeed * 0.8;
 
-        // Billboarding name tag follows planet coordinates
-        // and ALWAYS faces straight towards the user/camera!
-        if (p.labelSprite) {
-          p.labelSprite.position.set(
-            p.mesh.position.x,
-            p.mesh.position.y + p.labelOffset,
-            p.mesh.position.z
-          );
-        }
-      });
+          // Billboarding name tag follows planet coordinates
+          // and ALWAYS faces straight towards the user/camera!
+          if (p.labelSprite) {
+            p.labelSprite.position.set(
+              p.mesh.position.x,
+              p.mesh.position.y + p.labelOffset,
+              p.mesh.position.z
+            );
+          }
+        });
+      }
 
       // Continuous authentic axial rotation of Earth around its 23.44° polar tilt
       continuousEarthRotY += dt * 0.35;

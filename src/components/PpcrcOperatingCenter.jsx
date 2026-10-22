@@ -100,8 +100,8 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
     const sunLight = new THREE.DirectionalLight(0xfff7ed, 2.2);
     sunLight.position.set(28, 48, 40);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
-    sunLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.bias = -0.0001;
     scene.add(sunLight);
 
@@ -225,17 +225,20 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
 
     const attachBuildingScene = (rootScene) => {
       if (isDisposed) return;
-      const root = rootScene.clone(true);
+      // Direct attachment avoids expensive deep clone of 12MB scene graph on main thread
+      const root = rootScene;
 
       root.traverse((child) => {
         if (child.isMesh) {
           const m = child;
-          m.castShadow = true;
-          m.receiveShadow = true;
-
           const name = (m.name || '').toLowerCase();
           const parentName = (m.parent ? m.parent.name || '' : '').toLowerCase();
           const ln = name + ' ' + parentName;
+
+          // Only major structural walls and roof cast shadows; skip thousands of vertices on trim/hardware
+          const isStructural = ln.includes('wall') || ln.includes('facade') || ln.includes('wing') || ln.includes('roof');
+          m.castShadow = isStructural;
+          m.receiveShadow = isStructural || ln.includes('floor');
 
           // Completely detach legacy procedural paving, platform, and planter meshes
           const isLegacyGroundOrPlanter =
@@ -354,6 +357,8 @@ export default function PpcrcOperatingCenter({ visible = false, onScrollUp }) {
       createFrontPillar(7.6, 9.2);
 
       modelGroup.add(root);
+      // Precompile shaders on GPU during idle time so first frame render is seamless
+      renderer.compile(scene, camera);
     };
 
     if (cachedBuildingScene) {
